@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2d4b31">
+  <script>
+    // Apply the saved theme before first paint so the screen doesn't flash.
+    try { if (JSON.parse(localStorage.getItem('tb.theme')) === 'light') document.documentElement.dataset.theme = 'light'; } catch {}
+  </script>
+  <meta name="description" content="Blaze: your personal hiking buddy. Track hikes, keep a log, find new trails, and pack right.">
+  <title>Blaze</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&display=swap" crossorigin>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <button id="menu-btn" class="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <h1 id="title">Blaze</h1>
+    <button id="rec-pill" class="rec-pill" hidden>● REC</button>
+  </header>
+
+  <main>
+    <!-- Track: live GPS recording -->
+    <section id="view-track" class="view fill" hidden>
+      <div class="map-wrap">
+        <div id="track-map" class="map"></div>
+        <button id="btn-recenter" class="map-fab" aria-label="Center on my location">◎</button>
+      </div>
+      <div id="track-panel" class="track-panel" data-status="idle">
+        <div id="track-status" class="track-status">Ready when you are</div>
+        <div class="stat-grid">
+          <div><span id="t-dist" class="v">0.00</span><span id="t-dist-u" class="u">mi</span><label>Distance</label></div>
+          <div><span id="t-time" class="v">0:00:00</span><label>Time</label></div>
+          <div><span id="t-gain" class="v">0</span><span id="t-gain-u" class="u">ft</span><label>Climb</label></div>
+          <div><span id="t-pace" class="v">–</span><span id="t-pace-u" class="u">/mi</span><label>Pace</label></div>
+        </div>
+        <div class="track-actions">
+          <button id="btn-start" class="btn primary big">▶ Start hike</button>
+          <button id="btn-pause" class="btn big" hidden>❚❚ Pause</button>
+          <button id="btn-resume" class="btn primary big" hidden>▶ Resume</button>
+          <button id="btn-finish" class="btn danger big" hidden>■ Finish</button>
+        </div>
+        <button id="btn-discard" class="link-btn" hidden>Discard this hike</button>
+        <div id="track-weather"></div>
+        <p class="hint">Keep Blaze open while tracking. Android pauses GPS for web apps when the screen is locked, so the screen stays on while you record.</p>
+      </div>
+    </section>
+
+    <!-- Hikes: the log -->
+    <section id="view-hikes" class="view" hidden>
+      <div class="toolbar">
+        <span id="hikes-summary" class="muted"></span>
+        <div class="toolbar-actions">
+          <label class="btn small ghost">Import GPX<input id="gpx-input" type="file" accept=".gpx,application/gpx+xml" hidden></label>
+          <button id="btn-add-hike" class="btn small primary">+ Log hike</button>
+        </div>
+      </div>
+      <div id="hike-list" class="list"></div>
+    </section>
+
+    <!-- Explore: recommendations from OpenStreetMap, ranked by your history -->
+    <section id="view-explore" class="view" hidden>
+      <div class="map-wrap explore-map-wrap">
+        <div id="explore-map" class="map"></div>
+        <form id="search-form" class="map-search" role="search">
+          <input id="search-input" type="search" placeholder="Search a trail, peak, lake…" enterkeyhint="search" autocomplete="off" aria-label="Search for a hike or place by name">
+        </form>
+        <button id="btn-search-area" class="map-pill">Search this area</button>
+      </div>
+      <div class="explore-controls">
+        <button id="btn-near-me" class="btn primary">📍 Near me</button>
+        <label class="select-wrap">Within
+          <select id="radius"></select>
+        </label>
+      </div>
+      <div id="kind-filters" class="chips scroll"></div>
+      <div id="explore-note" class="muted small"></div>
+      <div id="explore-list" class="list"></div>
+    </section>
+
+    <!-- Pack: hiking & camping essentials checklist -->
+    <section id="view-pack" class="view" hidden>
+      <div id="pack-content"></div>
+    </section>
+
+    <!-- Saved: wishlist -->
+    <section id="view-saved" class="view" hidden>
+      <div id="saved-list" class="list"></div>
+    </section>
+
+    <!-- Me: stats, settings, backup -->
+    <section id="view-me" class="view" hidden>
+      <div id="me-content"></div>
+    </section>
+  </main>
+
+  <div id="scrim" class="scrim"></div>
+  <nav id="drawer" class="drawer" aria-label="Pages" aria-hidden="true">
+    <div class="drawer-head">
+      <img class="logo" src="icons/icon-192.png" alt="">
+      <div><strong>Blaze</strong><span>Your hiking buddy</span></div>
+    </div>
+    <button data-tab="track">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5" class="fill"/></svg>
+      <span class="label">Track<small>Record a hike with GPS</small></span><span class="rec-dot" hidden>● REC</span>
+    </button>
+    <button data-tab="hikes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20l6-11 4 6 3-4 5 9z"/></svg>
+      <span class="label">My hikes<small>Your hike log</small></span>
+    </button>
+    <button data-tab="explore">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z" class="fill"/></svg>
+      <span class="label">Explore<small>Search and find new trails</small></span>
+    </button>
+    <button data-tab="pack">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6V4.5a3 3 0 0 1 6 0V6"/><rect x="5" y="6" width="14" height="15" rx="4"/><path d="M5 13h14M10 13v2.5h4V13"/></svg>
+      <span class="label">Pack<small>Hiking &amp; camping checklist</small></span>
+    </button>
+    <button data-tab="saved">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h10v17l-5-4-5 4z"/></svg>
+      <span class="label">Wishlist<small>Places you want to go</small></span>
+    </button>
+    <button data-tab="me">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-7M21 20H3"/></svg>
+      <span class="label">Me<small>Stats, settings &amp; backup</small></span>
+    </button>
+  </nav>
+
+  <div id="sheets"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
