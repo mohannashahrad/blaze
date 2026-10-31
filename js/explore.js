@@ -104,16 +104,26 @@ function searchNearMe() {
 
 async function searchNearby(lat, lon) {
   const radiusM = +$('#radius').value;
-  setBusy(true, 'Searching… (can take a minute)');
-  try {
-    raw = await findNearby(lat, lon, radiusM);
+  setBusy(true, 'Searching…');
+  const show = async places => {
+    raw = places;
     origin = [lat, lon];
     searchedRadius = radiusM;
     clearSearch(false);
-    await db.put('kv', { origin, radiusM, places: raw, at: Date.now() }, 'lastExplore');
     await rescore();
     fitResults();
-    if (!raw.length) toast('Nothing found here. Try a bigger radius.');
+  };
+  try {
+    // Peaks, lakes and the like usually arrive well before the trails: show them while trails load.
+    // (Relabel first: trails can land while these are still drawing, and the final setBusy(false) must win.)
+    const { places, missing } = await findNearby(lat, lon, radiusM, partial => {
+      setBusy(true, 'Finding trails…');
+      show(partial);
+    });
+    await show(places);
+    await db.put('kv', { origin, radiusM, places: raw, at: Date.now() }, 'lastExplore');
+    if (missing) toast(`Couldn't load the ${missing === 'trails' ? 'trails' : 'peaks, lakes and other places'} this time. Try again in a minute.`, 5000);
+    else if (!raw.length) toast('Nothing found here. Try a bigger radius.');
   } catch (err) {
     console.warn(err);
     toast(navigator.onLine === false ? 'You\'re offline. Showing your last search.' : err.message, 6000);

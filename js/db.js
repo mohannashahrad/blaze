@@ -2,7 +2,7 @@
 //   hikes   – logged hikes (GPS tracks, GPX imports, manual entries)
 //   saved   – wishlist places
 //   photos  – resized photo blobs, indexed by hikeId
-//   kv      – misc: the in-progress recording, last Explore results
+//   kv      – misc: the in-progress recording, last Explore results, cached nearby searches and trail lines
 
 // Kept from the app's earlier name, Trail Buddy, so existing hikes stay where they are.
 const DB_NAME = 'trail-buddy';

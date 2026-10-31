@@ -122,7 +122,7 @@ Each suggestion explains itself, so you always know *why* it showed up.
 
 All of them are free, need no API keys, and get **no personal data**: just the map area or the coordinates being looked up.
 
-> ⏳ Overpass is a free public service and is sometimes slow or busy, so a *Near me* search can take up to a minute. Blaze keeps your last results, so they show instantly (and offline) next time.
+> ⏳ Overpass is a free public service and is sometimes slow or busy. To make that hurt less, Blaze asks the next Overpass server whenever one is slow or fails, shows peaks, lakes and waterfalls as soon as they arrive while trails are still loading, and remembers your recent searches and the trail lines you've opened, so they come back instantly (and offline) next time.
 
 ## 🔒 Privacy
 
@@ -154,10 +154,12 @@ js/
 ├── map.js            Leaflet helpers
 ├── db.js             IndexedDB storage
 └── util.js           DOM, formatting, units, sheets
+vendor/               Leaflet 1.9.4 and the Bitter font, served with the app
+dev/test-osm.mjs      Node tests for the OpenStreetMap client (not part of the app)
 ```
 
 **Tech:**
-- [Leaflet](https://leafletjs.com) for maps
+- [Leaflet](https://leafletjs.com) for maps, plus the [Bitter](https://fonts.google.com/specimen/Bitter) font, both in `vendor/` so the app needs no third-party requests to start
 - IndexedDB for storage
 - A service worker for offline use
 - The Screen Wake Lock API to keep the screen on while tracking

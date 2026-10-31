@@ -1,7 +1,7 @@
 // Service worker: makes the app open offline, and keeps map tiles you've seen
 // so the map still works on the trail without signal.
 
-const VERSION = 'blaze-v7'; // bump when shipping changes so the shell is re-cached
+const VERSION = 'blaze-v8'; // bump when shipping changes so the shell is re-cached
 const TILE_CACHE = 'blaze-tiles';
 const MAX_TILES = 4000;
 
@@ -30,8 +30,12 @@ const SHELL = [
   './js/util.js',
   './js/weather.js',
   './js/wishlist.js',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  './vendor/leaflet/leaflet.css',
+  './vendor/leaflet/leaflet.js',
+  './vendor/leaflet/images/layers.png',
+  './vendor/leaflet/images/layers-2x.png',
+  './vendor/fonts/bitter-latin.woff2',
+  './vendor/fonts/bitter-latin-ext.woff2',
 ];
 
 const TILE_HOST = /(^|\.)tile\.(openstreetmap|opentopomap)\.org$/;
@@ -56,7 +60,6 @@ self.addEventListener('fetch', event => {
   const url = new URL(req.url);
   if (TILE_HOST.test(url.hostname)) event.respondWith(tile(req));
   else if (url.origin === self.location.origin) event.respondWith(appFile(req));
-  else if (/^(unpkg\.com|fonts\.(googleapis|gstatic)\.com)$/.test(url.hostname)) event.respondWith(library(req));
   // Everything else (Overpass, weather, geocoding) goes straight to the network.
 });
 
@@ -77,16 +80,6 @@ async function appFile(req) {
   } catch { /* offline */ }
   const cached = await cache.match(req, { ignoreSearch: true });
   return cached || network;
-}
-
-// Libraries and fonts have versioned URLs that never change, so the cache is always right.
-async function library(req) {
-  const cache = await caches.open(VERSION);
-  const cached = await cache.match(req);
-  if (cached) return cached;
-  const res = await fetch(req);
-  if (res.ok) cache.put(req, res.clone());
-  return res;
 }
 
 let tilePuts = 0;

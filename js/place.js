@@ -69,16 +69,20 @@ export function openPlaceDetail(place) {
   const map = makeMap(mapEl);
   map.setView([place.lat, place.lon], 13);
   L.marker([place.lat, place.lon], { icon: pinIcon(kind.emoji) }).addTo(map);
-  sheet.onClose(() => map.remove());
-  setTimeout(() => map.invalidateSize(), 320);
+  let closed = false;
+  sheet.onClose(() => { closed = true; map.remove(); });
+  // The sheet slides in for ~300 ms; size the map once it has settled.
+  const sized = new Promise(resolve => setTimeout(() => { if (!closed) map.invalidateSize(); resolve(); }, 320));
 
   getForecast(place.lat, place.lon)
     .then(days => weatherEl.replaceChildren(forecastCards(days)))
     .catch(() => weatherEl.replaceChildren(h('p', { class: 'muted small' }, 'Forecast unavailable (offline?).')));
 
   if (place.osmType === 'relation' || (place.osmType === 'way' && place.kind === 'route')) {
-    routeGeometry(place.osmType, place.osmId).then(({ lines, lengthM }) => {
-      if (!lines.length) return;
+    // A cached trail line is ready at once: still wait for the map to be sized, or fitBounds frames
+    // the wrong area and its zoom animation can trip over the resize (or over map.remove()).
+    Promise.all([routeGeometry(place.osmType, place.osmId), sized]).then(([{ lines, lengthM }]) => {
+      if (closed || !lines.length) return;
       const layer = L.featureGroup(lines.map(l => L.polyline(l, ROUTE_STYLE))).addTo(map);
       map.fitBounds(layer.getBounds(), { padding: [20, 20] });
       if (!place.lengthM && lengthM) lengthEl.textContent = `≈ ${fmtDist(lengthM)} (from map data)`;
