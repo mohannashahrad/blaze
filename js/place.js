@@ -64,7 +64,9 @@ export function openPlaceDetail(place) {
           emit('explore-here', { lat: place.lat, lon: place.lon });
         },
       }, '🧭 Find hikes near here'),
-      h('a', { class: 'btn ghost', href: osmUrl(place), target: '_blank', rel: 'noopener' }, 'OpenStreetMap ↗')));
+      place.osmType ? h('a', { class: 'btn ghost', href: osmUrl(place), target: '_blank', rel: 'noopener' }, 'OpenStreetMap ↗') : null,
+      safeUrl(place.sourceUrl) ? h('a', { class: 'btn ghost', href: place.sourceUrl, target: '_blank', rel: 'noopener' },
+        /google\.|goo\.gl/.test(place.sourceUrl) ? 'Google Maps ↗' : 'Shared link ↗') : null));
 
   const map = makeMap(mapEl);
   map.setView([place.lat, place.lon], 13);

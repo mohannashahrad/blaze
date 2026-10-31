@@ -51,6 +51,7 @@ Every hike gets its map, an **elevation profile**, stars, difficulty, tags, note
   - *"Somewhere new"*
 - Each place shows a **3-day forecast**, the trail line, and one-tap **directions**
 - Save places to your **wishlist**. When you finally go, tap *"I hiked it"* and it moves into your journal
+- **Found a hike in Google Maps?** Tap **Share → Blaze**. Blaze finds it on OpenStreetMap for you to confirm, or saves the exact spot when the link includes one, or lets you drop a pin
 
 ### 🎒 Pack
 A checklist for **day hikes** and **camping**, starting with the classic **Ten Essentials**.
@@ -145,6 +146,7 @@ js/
 ├── place.js          place details: forecast, trail line, wishlist
 ├── pack.js           packing checklist  ·  pack-data.js  the items
 ├── saved.js          wishlist page      ·  wishlist.js   wishlist storage
+├── share.js          "Share → Blaze": turns a shared Google Maps place into a wishlist place
 ├── me.js             stats, settings, backup
 ├── recommend.js      taste profile + scoring (pure functions)
 ├── geo.js            distance / climb / track math (pure functions)
@@ -155,7 +157,7 @@ js/
 ├── db.js             IndexedDB storage
 └── util.js           DOM, formatting, units, sheets
 vendor/               Leaflet 1.9.4 and the Bitter font, served with the app
-dev/test-osm.mjs      Node tests for the OpenStreetMap client (not part of the app)
+dev/                  Node tests (not part of the app): test-osm.mjs, test-share.mjs
 ```
 
 **Tech:**

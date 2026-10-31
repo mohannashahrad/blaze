@@ -19,7 +19,7 @@ async function render() {
     list.replaceChildren(h('div', { class: 'empty' },
       h('div', { class: 'empty-icon' }, '⭐'),
       h('p', {}, h('strong', {}, 'Your wishlist is empty')),
-      h('p', { class: 'muted' }, 'Find places in Explore and tap ☆ to save them for later.')));
+      h('p', { class: 'muted' }, 'Find places in Explore and tap ☆ to save them for later. You can also share a place from Google Maps to Blaze.')));
     return;
   }
   list.replaceChildren(...items.map(card));

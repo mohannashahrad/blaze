@@ -7,6 +7,7 @@ import * as explore from './explore.js';
 import * as pack from './pack.js';
 import * as saved from './saved.js';
 import * as me from './me.js';
+import { takeShare, openShareSheet } from './share.js';
 
 const VIEWS = { track, hikes, explore, pack, saved, me };
 const TITLES = { track: 'Track', hikes: 'My hikes', explore: 'Explore', pack: 'Packing list', saved: 'Wishlist', me: 'Me' };
@@ -104,6 +105,10 @@ async function main() {
   recording = track.status();
   // Always reopen on Track if a hike is in progress.
   show(track.isActive() ? 'track' : settings.get('tab') || 'track');
+
+  // Opened from the share menu (e.g. Google Maps → Share → Blaze): offer to add it to the wishlist.
+  const shared = takeShare();
+  if (shared) openShareSheet(shared);
 
   if ('serviceWorker' in navigator) {
     // When an updated version takes over, reload once so every file is from the same version.

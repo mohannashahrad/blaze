@@ -1,7 +1,7 @@
 // Service worker: makes the app open offline, and keeps map tiles you've seen
 // so the map still works on the trail without signal.
 
-const VERSION = 'blaze-v8'; // bump when shipping changes so the shell is re-cached
+const VERSION = 'blaze-v9'; // bump when shipping changes so the shell is re-cached
 const TILE_CACHE = 'blaze-tiles';
 const MAX_TILES = 4000;
 
@@ -26,6 +26,7 @@ const SHELL = [
   './js/place.js',
   './js/recommend.js',
   './js/saved.js',
+  './js/share.js',
   './js/track.js',
   './js/util.js',
   './js/weather.js',
@@ -70,7 +71,8 @@ const NETWORK_WAIT_MS = 4000;
 async function appFile(req) {
   const cache = await caches.open(VERSION);
   const network = fetch(req, { cache: 'no-cache' }).then(res => {
-    if (res.ok) cache.put(req, res.clone());
+    // Shared links open the app as ./?share_…; keep a single cached copy of the page, not one per share.
+    if (res.ok) cache.put(new URL(req.url).pathname, res.clone());
     return res;
   });
   const timeout = new Promise(resolve => setTimeout(resolve, NETWORK_WAIT_MS));

@@ -459,6 +459,14 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
 .card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .saved-card { display: block; }
 
+/* "Add to wishlist" sheet, opened by sharing a place to Blaze */
+.share-name { font-family: var(--display); font-size: 1.35rem; font-weight: 700; margin: 2px 0 4px; }
+.share-label { margin-top: 22px; }
+.share-search { display: flex; gap: 8px; margin-bottom: 12px; }
+.share-search input { flex: 1; min-width: 0; }
+.share-pin { margin: 16px 0; }
+.share-pin .btn { width: 100%; }
+
 .place-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .kind-badge { background: var(--chip); color: var(--chip-ink); border-radius: 999px; padding: 5px 12px; font-size: .88rem; font-weight: 650; }
 .reasons { margin: 0 0 14px; padding-left: 20px; color: var(--moss); }
